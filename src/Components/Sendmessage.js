@@ -16,44 +16,57 @@ const Sendmessage = () => {
             setEmptyfileerror(true)
         }
         else {
+
             setEmptyfileerror(false)
             let message = document.getElementById("message").value;
-             message= message.replace(/’/g, '');
+            message = message.replace(/’/g, '');
             //   message= message.replace(/(?:\r\n|\r|\n)/g, '<br>');
-              message= message.replace(/(?:\r\n|\r|\n)/g, ' ');
+            message = message.replace(/(?:\r\n|\r|\n)/g, ' ');
 
 
-            const data= {
+            const data = {
                 importdata, message
             }
 
             async function apicall(data) {
-                await fetch('http://localhost:3008/api/insertwhatsappdata', {
-                    method: 'POST', 
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data[0]===undefined){
-                            alert("error")
-                            window.location.reload();
-                        }
-                        else{
+                // console.log(data.importdata.map(num => (`http://192.168.146.19:3000/91${num.phone_no}/${message}/`)))
 
-                            
-                            // alert("send")
-                            // window.location.reload();
-                        }
+                //    #########  for get last Message Id
+                await fetch('http://localhost:3008/api/getlastmessageid')
+                    .then(response => response.json())
+                    .then(id => {
+                        data.message_id = id[0] + 1;
+
+
+                        //#################    send message to save db
+                        fetch('http://localhost:3008/api/insertwhatsappdata', {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data[0] === undefined) {
+                                    alert("error")
+                                    window.location.reload();
+                                }
+                                else {
+                                         
+                                   
+                                    alert("send")
+                                    window.location.reload();
+                                }
+                            })
+                            .catch((error) => { console.error('Error:', error); });
+
                     })
                     .catch((error) => {
                         console.error('Error:', error);
                     });
+
             }
-            apicall(data);
+            apicall(data)
         }
 
     }
